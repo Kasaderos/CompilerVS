@@ -4,6 +4,6 @@ int c
 a = 0
 b = 1
 c = 2
-a = c - b + 1
+a = c - b + 1 + 100
 print a
 $
