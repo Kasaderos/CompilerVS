@@ -1,24 +1,11 @@
 #ifndef __LEXICAL_H__
 #define __LEXICAL_H__
+#include "enum.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
 using namespace std;
-
-const int NUM_WORDS = 9;
-
-enum type_lex {
-	LEX_NULL, // 0   
-	LEX_ASSIGN, // 1
-	LEX_INT, // 2
-	LEX_FLOAT, LEX_PRINT,  // 3, 4, 
-	LEX_PLUS, LEX_MINUS, LEX_NLINE, // 5, 6, 7
-	LEX_FIN,
-	LEX_FNUM, LEX_INUM,// 8
-	LEX_ID, // 9
-	POLIZ_ADDRESS, // 10
-};
 
 class Lex {
 public:
@@ -61,11 +48,14 @@ class Scanner
 public:
 	char c;
 	char next;
-	static type_lex types[];
+	static type_lex tw[];
+	static type_lex td[];
 	static const string LEXS[];
-	static const string TWD[];
+	static const string TD[];
+	static const string TW[];
 	void gc();
-	int look();
+	int lookTW();
+	int lookTD();
 	Scanner(const char * filename);
 	Lex get_lex();
 	~Scanner();

@@ -22,6 +22,7 @@
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="lexical.cpp" />
     <ClCompile Include="syntax.cpp" />
+    <ClCompile Include="twd.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="file.txt" />
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ClInclude Include="lexical.h" />
     <ClInclude Include="syntax.h" />
+    <ClInclude Include="enum.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B150DAF1-9F03-47D6-8FBD-9E7F929B3B5D}</ProjectGuid>

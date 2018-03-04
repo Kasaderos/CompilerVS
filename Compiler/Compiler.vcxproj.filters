@@ -24,12 +24,18 @@
     <ClCompile Include="syntax.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
+    <ClCompile Include="twd.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lexical.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
     <ClInclude Include="syntax.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="enum.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>
