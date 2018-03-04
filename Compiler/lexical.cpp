@@ -50,8 +50,8 @@ Lex::Lex(double f) {
 Lex convert(const Lex & a) {
 	if (a.t_lex == LEX_ID) {
 		int i = atoi(a.v_lex.c_str());
-		cout << "convert : ";
-		cout << Scanner::LEXS[TID.var[i].type] << endl;
+		//cout << "convert : ";
+		//cout << Scanner::LEXS[TID.var[i].type] << endl;
 		if (TID.var[i].type == LEX_INT)
 			return Lex(LEX_INUM, TID.var[i].val);
 		if (TID.var[i].type == LEX_FLOAT)
@@ -65,17 +65,13 @@ Lex convert(const Lex & a) {
 Lex operator + (const Lex & a, const Lex & b) {
 	Lex lex1 = convert(a);
 	Lex lex2 = convert(b);
-	cout << Scanner::LEXS[lex1.t_lex] << endl;
-	cout << Scanner::LEXS[lex2.t_lex] << endl;
+	//cout << Scanner::LEXS[lex1.t_lex] << endl;
+	//cout << Scanner::LEXS[lex2.t_lex] << endl;
 	if (lex1.t_lex == LEX_FNUM || lex2.t_lex == LEX_FNUM)
 		return atof(lex1.v_lex.c_str()) + atof(lex2.v_lex.c_str());
 	return atoi(lex1.v_lex.c_str()) + atoi(lex2.v_lex.c_str());
 }
 
-/* Lex + Lex
-Lex FNUM, INUM, ID
-
-*/
 Lex operator - (const Lex & a, const Lex & b) {
 	Lex lex1 = convert(a);
 	Lex lex2 = convert(b);
@@ -193,11 +189,4 @@ Lex Scanner::get_lex()
 	} while (1);
 	return Lex(LEX_NULL, "");
 }
-/*
-d = atoi(buf.c_str()); // int(string)
-//buf.clear();
-}
-else if (f) {
-flt = d + atof(buf.c_str()) / pow(10, buf.size()); // ����� + ������� �����
-return Lex(LEX_FNUM, to_string(flt));
-}*/
+

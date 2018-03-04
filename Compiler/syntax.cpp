@@ -76,7 +76,7 @@ void Parser::deleteNLINE() {
 	do {
 		get_lex();
 	} while (curr_t == LEX_NLINE);
-	cout << "deleteNLINE: " << Scanner::LEXS[curr_t] << endl;
+	//cout << "deleteNLINE: " << Scanner::LEXS[curr_t] << endl;
 }
 void Parser::get_lex() {
 	curr_lex = scan.get_lex();
@@ -92,7 +92,7 @@ void Parser::analyze() {
 }
 
 void Parser::Prog() {
-	cout << "Prog" << endl;
+	//cout << "Prog" << endl;
 	deleteNLINE();
 	Dcls();
 	Stmts();
@@ -101,7 +101,7 @@ void Parser::Prog() {
 }
 
 void Parser::Dcls() {
-	cout << "Dcls" << endl;
+	//cout << "Dcls" << endl;
 	st_int.reset();
 
 	while (1) {
@@ -113,7 +113,7 @@ void Parser::Dcls() {
 }
 
 void Parser::Del() {
-	cout << "Del" << endl;
+	//cout << "Del" << endl;
 	if (curr_t != LEX_FLOAT && curr_t != LEX_INT)
 		throw curr_lex;
 	type_var = curr_t;					// LEX_FLOAT | LEX_INT
@@ -129,7 +129,7 @@ void Parser::Del() {
 }
 
 void Parser::Stmts() {
-	cout << "Stmts" << endl;
+	//cout << "Stmts" << endl;
 	while (1) {
 		Stmt();
 		if (curr_t == LEX_FIN)
@@ -141,10 +141,8 @@ void Parser::Stmts() {
 }
 
 void Parser::Stmt() {
-	cout << "Stmt" << endl;
-	cout << "Stmt: " << Scanner::LEXS[curr_t] << endl;
+	//cout << "Stmt" << endl;
 	if (curr_t == LEX_FIN) {
-		cout << "Stmt: " << "case LEX_FIN" << endl;
 		return;
 	}
 	else if (curr_t == LEX_ID) {
@@ -173,7 +171,7 @@ void Parser::Stmt() {
 }
 
 void Parser::Val() {
-	cout << "Val" << endl;
+	//cout << "Val" << endl;
 	get_lex();
 	if (curr_t == LEX_ID) {
 		check_id();
@@ -245,7 +243,7 @@ void Parser::check_op()
 	cout << Scanner::LEXS[t1.t_lex] << endl;
 
 	if (t1.t_lex != t2.t_lex)
-		st_lex.push(Lex(LEX_FLOAT, ""));// �������������� ����� int -> float
+		st_lex.push(Lex(LEX_FLOAT, ""));
 	else if (t1.t_lex == t2.t_lex)
 		st_lex.push(t1);
 	else
@@ -291,7 +289,12 @@ void Executer::execute(Poliz & prog) {
 			lex3 = convert(lex1);
 			i = atoi(lex2.v_lex.c_str());
 			TID.var[i].val = lex3.v_lex;
-			TID.var[i].type = lex3.t_lex == LEX_FNUM ? LEX_FLOAT : LEX_INT;
+			if (lex3.t_lex == LEX_FNUM && TID.var[i].type == LEX_INT)
+				throw "impilcit float to int";
+			else if ((lex3.t_lex == LEX_FNUM || lex3.t_lex == LEX_INUM) && TID.var[i].type == LEX_FLOAT)
+				TID.var[i].type = LEX_FLOAT;
+			else
+				TID.var[i].type = LEX_INT;
 			TID.var[i].assign = true;
 			break;
 		case LEX_PRINT:
@@ -311,6 +314,7 @@ void Executer::execute(Poliz & prog) {
 void Interpretator::interpretation()
 {
 	pars.analyze();
+	cout << "Start execute: " << endl;
 	E.execute(pars.prog);
 }
 
