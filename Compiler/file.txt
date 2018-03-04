@@ -1,0 +1,8 @@
+int a
+float b
+float c
+b = 5
+c = 0.0
+b = c + b 
+print b
+$

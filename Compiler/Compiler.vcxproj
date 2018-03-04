@@ -18,6 +18,18 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="lexical.cpp" />
+    <ClCompile Include="syntax.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="file.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lexical.h" />
+    <ClInclude Include="syntax.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B150DAF1-9F03-47D6-8FBD-9E7F929B3B5D}</ProjectGuid>
     <RootNamespace>Compiler</RootNamespace>
@@ -109,8 +121,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
