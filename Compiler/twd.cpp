@@ -20,9 +20,11 @@ type_lex Scanner::td[] = {
 	LEX_SEQ,
 	LEX_SNQ,
 	LEX_FIN,
+	LEX_NULL
 };
 
 type_lex Scanner::tw[] = {
+	LEX_NULL,
 	LEX_INT,
 	LEX_FLOAT,
 	LEX_CHAR,
@@ -35,6 +37,7 @@ type_lex Scanner::tw[] = {
 	LEX_AND,
 	LEX_OR,
 	LEX_NOT,
+	LEX_NULL
 };
 
 const string Scanner::TD[] = {
@@ -61,6 +64,7 @@ const string Scanner::TD[] = {
 };
 
 const string Scanner::TW[] = {
+	"",
 	"int",
 	"float",
 	"char",

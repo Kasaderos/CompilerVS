@@ -90,7 +90,7 @@ void Scanner::gc() {
 }
 
 int Scanner::lookTW() {
-	int i = 0;
+	int i = 1;
 	while (!TW[i].empty()) {
 		if (!buf.compare(TW[i]))
 			return i;
@@ -100,7 +100,7 @@ int Scanner::lookTW() {
 }
 
 int Scanner::lookTD() {
-	int i = 0;
+	int i = 1;
 	while (!TD[i].empty()) {
 		if (!buf.compare(TD[i]))
 			return i;
@@ -179,5 +179,11 @@ Lex Scanner::get_lex()
 		}
 	} while (1);
 	return Lex(LEX_NULL, "");
+}
+
+void Table_ident::print() {
+	cout << endl;
+	for (int i = 0; i < TID.var.size(); i++)
+		cout << TID.var[i].name << " : " << TID.var[i].val << endl;
 }
 

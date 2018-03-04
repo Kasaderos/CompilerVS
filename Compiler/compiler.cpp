@@ -2,14 +2,13 @@
 #include <stdio.h>
 #include <fstream>
 #include "lexical.h"
-//#include "syntax.h"
+#include "syntax.h"
 using namespace std;
 
 Table_ident TID;
-
+void check_scan();
 int main(int argc, char **argv)
 {
-	/*
 	Interpretator interpretator("file.txt");
 	try {
 		interpretator.interpretation();
@@ -22,7 +21,12 @@ int main(int argc, char **argv)
 	}
 	catch (string str) {
 		cout << str << endl;
-	}*/
+	}
+	getchar();
+	return 0;
+}
+
+void check_scan() {
 	Scanner scan("file.txt");
 	try {
 		while (1) {
@@ -33,9 +37,7 @@ int main(int argc, char **argv)
 		}
 	}
 	catch (char c) {
-		cout << c << endl;
+		cout << "error" << c << endl;
 	}
-	getchar();
-	return 0;
+	TID.print();
 }
-

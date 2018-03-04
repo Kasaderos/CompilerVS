@@ -37,6 +37,7 @@ class Table_ident {
 public:
 	vector< Ident > var;
 	int put(Ident id);
+	void print();
 };
 
 class Scanner
