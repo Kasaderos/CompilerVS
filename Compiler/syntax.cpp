@@ -92,7 +92,7 @@ void Parser::deleteNLINE() {
 void Parser::get_lex() {
 	curr_lex = scan.get_lex();
 	curr_t = curr_lex.t_lex;
-	curr_v = curr_lex.v_lex;
+	curr_v = curr_lex.val;
 	//cout << curr_lex << endl;
 }
 void Parser::analyze() {
@@ -124,7 +124,7 @@ void Parser::Dcls() {
 
 void Parser::Del() {
 	//cout << "Del" << endl;
-	if (curr_t != LEX_FLOAT && curr_t != LEX_INT)
+	if (curr_t != LEX_FLOAT && curr_t != LEX_INT) // заменить на функцию
 		throw curr_lex;
 	type_var = curr_t;					// LEX_FLOAT | LEX_INT
 	get_lex();
@@ -145,8 +145,6 @@ void Parser::Stmts() {
 		if (curr_t == LEX_FIN)
 			return;
 		deleteNLINE();
-
-
 	}
 }
 
@@ -279,7 +277,7 @@ void Executer::execute(Poliz & prog) {
 			args.push(curr_lex);
 			break;
 		case LEX_ID:
-			i = atoi(curr_lex.v_lex.c_str());
+			i = atoi(curr_lex.val.c_str());
 			if (TID.var[i].assign) {
 				args.push(curr_lex);
 				break;
@@ -297,8 +295,8 @@ void Executer::execute(Poliz & prog) {
 			lex1 = args.pop();
 			lex2 = args.pop();
 			lex3 = convert(lex1);
-			i = atoi(lex2.v_lex.c_str());
-			TID.var[i].val = lex3.v_lex;
+			i = atoi(lex2.val.c_str());
+			TID.var[i].val = lex3.val;
 			if (lex3.t_lex == LEX_FNUM && TID.var[i].type == LEX_INT)
 				throw "impilcit float to int";
 			else if ((lex3.t_lex == LEX_FNUM || lex3.t_lex == LEX_INUM) && TID.var[i].type == LEX_FLOAT)
@@ -310,7 +308,7 @@ void Executer::execute(Poliz & prog) {
 		case LEX_PRINT:
 			lex1 = args.pop();
 			lex2 = convert(lex1);
-			cout << lex2.v_lex << endl;
+			cout << lex2.val << endl;
 			break;
 		default:
 			throw "POLIZ: unexpected elem";

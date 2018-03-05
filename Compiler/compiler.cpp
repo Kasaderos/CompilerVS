@@ -2,13 +2,16 @@
 #include <stdio.h>
 #include <fstream>
 #include "lexical.h"
-#include "syntax.h"
+//#include "syntax.h"
 using namespace std;
 
 Table_ident TID;
 void check_scan();
+
 int main(int argc, char **argv)
 {
+	check_scan();
+	/*
 	Interpretator interpretator("file.txt");
 	try {
 		interpretator.interpretation();
@@ -21,7 +24,7 @@ int main(int argc, char **argv)
 	}
 	catch (string str) {
 		cout << str << endl;
-	}
+	}*/
 	getchar();
 	return 0;
 }

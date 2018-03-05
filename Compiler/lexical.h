@@ -10,8 +10,8 @@ using namespace std;
 class Lex {
 public:
 	type_lex t_lex;
-	string v_lex;
-	Lex();
+	string val;
+	Lex(type_lex t = LEX_NULL);
 	Lex(type_lex t, string v);
 	Lex(double f);
 	Lex(int f);
@@ -22,15 +22,15 @@ public:
 
 Lex convert(const Lex & a);
 
-class Ident {
+class Ident : public Lex{
 public:
 	type_lex type;
 	string name;
-	string val;
+	int num;
 	bool declare;
 	bool assign;
 	Ident();
-	explicit Ident(const string str);
+	explicit Ident(const string str, int n = 0);
 };
 
 class Table_ident {

@@ -4,32 +4,37 @@ using namespace std;
 
 extern Table_ident TID;
 
-Ident::Ident() : val(""), declare(false), assign(false) {}
+Ident::Ident() : declare(false), assign(false) {
+	val = "";
+}
+// параметры по умолчанию не переопределяются в vs
+Ident::Ident(const string str, int n) : name(str), declare(false), assign(false) {
+	val = "";
+	num = n;
+}
 
-Ident::Ident(const string str) : name(str), val(""), declare(false), assign(false) {}
-
-Lex::Lex() {
-	t_lex = LEX_NULL;
-	v_lex = "_";
+Lex::Lex(type_lex t) {
+	t_lex = t;
+	val = "";
 }
 Lex::Lex(type_lex t, string v) {
 	t_lex = t;
-	v_lex = v;
+	val = v;
 }
 
 Lex::Lex(int i) {
 	t_lex = LEX_INUM;
-	v_lex = to_string(i);
+	val = to_string(i);
 }
 
 Lex::Lex(double f) {
 	t_lex = LEX_FNUM;
-	v_lex = to_string(f);
+	val = to_string(f);
 }
 
 Lex convert(const Lex & a) {
 	if (a.t_lex == LEX_ID) {
-		int i = atoi(a.v_lex.c_str());
+		int i = atoi(a.val.c_str());
 		//cout << "convert : ";
 		//cout << Scanner::LEXS[TID.var[i].type] << endl;
 		if (TID.var[i].type == LEX_INT)
@@ -48,16 +53,16 @@ Lex operator + (const Lex & a, const Lex & b) {
 	//cout << Scanner::LEXS[lex1.t_lex] << endl;
 	//cout << Scanner::LEXS[lex2.t_lex] << endl;
 	if (lex1.t_lex == LEX_FNUM || lex2.t_lex == LEX_FNUM)
-		return atof(lex1.v_lex.c_str()) + atof(lex2.v_lex.c_str());
-	return atoi(lex1.v_lex.c_str()) + atoi(lex2.v_lex.c_str());
+		return atof(lex1.val.c_str()) + atof(lex2.val.c_str());
+	return atoi(lex1.val.c_str()) + atoi(lex2.val.c_str());
 }
 
 Lex operator - (const Lex & a, const Lex & b) {
 	Lex lex1 = convert(a);
 	Lex lex2 = convert(b);
 	if (lex1.t_lex == LEX_FNUM || lex2.t_lex == LEX_FNUM)
-		return atof(lex1.v_lex.c_str()) - atof(lex2.v_lex.c_str());
-	return atoi(lex1.v_lex.c_str()) - atoi(lex2.v_lex.c_str());
+		return atof(lex1.val.c_str()) - atof(lex2.val.c_str());
+	return atoi(lex1.val.c_str()) - atoi(lex2.val.c_str());
 }
 /*
 Lex Lex::operator * (const Lex & a, const Lex & b){
@@ -67,7 +72,7 @@ Lex Lex::operator / (const Lex & a, const Lex & b){
 
 }*/
 ostream & operator << (ostream & s, Lex lx) {
-	s << '(' << Scanner::LEXS[lx.t_lex] << ',' << lx.v_lex << ')';
+	s << '(' << Scanner::LEXS[lx.t_lex] << ',' << lx.val << ')';
 	return s;
 }
 
@@ -147,8 +152,8 @@ Lex Scanner::get_lex()
 				}
 				else {
 					Ident id(buf);
-					j = TID.put(id);
-					return Lex(LEX_ID, to_string(j));
+					id.num = TID.put(id);
+					return Lex(LEX_ID);
 				}
 			}
 			break;
@@ -171,19 +176,19 @@ Lex Scanner::get_lex()
 			buf.push_back(c);
 			if ((j = lookTD()) != 0) {
 				gc();
-				return Lex(td[j], to_string(j));
+				return Lex(td[j]);
 			}
 			else
 				throw c;
 			break;
 		}
 	} while (1);
-	return Lex(LEX_NULL, "");
+	return Lex();
 }
 
 void Table_ident::print() {
 	cout << endl;
 	for (int i = 0; i < TID.var.size(); i++)
-		cout << TID.var[i].name << " : " << TID.var[i].val << endl;
+		cout << TID.var[i].name << " : " << TID.var[i].num << endl;
 }
 
