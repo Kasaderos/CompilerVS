@@ -7,14 +7,27 @@
 #include <string>
 using namespace std;
 
+union value {
+	int i;
+	double d;
+	string str;
+	char ch;
+	bool b;
+	value(int i = 0);
+	value(double d);
+	value(string str);
+	value(char ch);
+	value(bool b);
+};
+
 class Lex {
 public:
 	type_lex t_lex;
-	string v_lex;
+	value v_lex;
 	Lex();
-	Lex(type_lex t, string v);
-	Lex(double f);
-	Lex(int f);
+	Lex(type_lex t, value v);
+	Lex(double d);
+	Lex(int i);
 	friend ostream & operator << (ostream & s, Lex lx);
 	friend Lex operator + (const Lex & a, const Lex & b);
 	friend Lex operator - (const Lex & a, const Lex & b);
@@ -26,7 +39,7 @@ class Ident {
 public:
 	type_lex type;
 	string name;
-	string val;
+	value val;
 	bool declare;
 	bool assign;
 	Ident();

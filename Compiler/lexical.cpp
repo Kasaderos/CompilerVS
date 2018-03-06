@@ -4,29 +4,34 @@ using namespace std;
 
 extern Table_ident TID;
 
-Ident::Ident() : val(""), declare(false), assign(false) {}
+value::value(int i = 0) : i(i) {}
+value::value(double d) : d(d) {}
+value::value(string str) : str(str) {}
+value::value(char ch) : ch(ch) {}
+value::value(bool b) : b(b) {}
+Ident::Ident() : declare(false), assign(false), val(0) {}
 
-Ident::Ident(const string str) : name(str), val(""), declare(false), assign(false) {}
+Ident::Ident(const string str) : name(str), val(0), declare(false), assign(false) {}
 
 Lex::Lex() {
 	t_lex = LEX_NULL;
-	v_lex = "_";
+	v_lex = value();
 }
-Lex::Lex(type_lex t, string v) {
+Lex::Lex(type_lex t, value v) {
 	t_lex = t;
 	v_lex = v;
 }
 
 Lex::Lex(int i) {
 	t_lex = LEX_INUM;
-	v_lex = to_string(i);
+	v_lex.i = i;
 }
 
-Lex::Lex(double f) {
+Lex::Lex(double d) {
 	t_lex = LEX_FNUM;
-	v_lex = to_string(f);
+	v_lex.d = d;
 }
-
+/*
 Lex convert(const Lex & a) {
 	if (a.t_lex == LEX_ID) {
 		int i = atoi(a.v_lex.c_str());
