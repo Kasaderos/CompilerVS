@@ -1,33 +1,33 @@
 #ifndef __LEXICAL_H__
 #define __LEXICAL_H__
+#include "enum.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
 using namespace std;
 
-const int NUM_WORDS = 9;
-
-enum type_lex {
-	LEX_NULL, // 0   
-	LEX_ASSIGN, // 1
-	LEX_INT, // 2
-	LEX_FLOAT, LEX_PRINT,  // 3, 4, 
-	LEX_PLUS, LEX_MINUS, LEX_NLINE, // 5, 6, 7
-	LEX_FIN,
-	LEX_FNUM, LEX_INUM,// 8
-	LEX_ID, // 9
-	POLIZ_ADDRESS, // 10
+union value {
+	int i;
+	double d;
+	string str;
+	char ch;
+	bool b;
+	value(int i = 0);
+	value(double d);
+	value(string str);
+	value(char ch);
+	value(bool b);
 };
 
 class Lex {
 public:
 	type_lex t_lex;
-	string v_lex;
+	value v_lex;
 	Lex();
-	Lex(type_lex t, string v);
-	Lex(double f);
-	Lex(int f);
+	Lex(type_lex t, value v);
+	Lex(double d);
+	Lex(int i);
 	friend ostream & operator << (ostream & s, Lex lx);
 	friend Lex operator + (const Lex & a, const Lex & b);
 	friend Lex operator - (const Lex & a, const Lex & b);
@@ -39,7 +39,7 @@ class Ident {
 public:
 	type_lex type;
 	string name;
-	string val;
+	value val;
 	bool declare;
 	bool assign;
 	Ident();
@@ -50,6 +50,7 @@ class Table_ident {
 public:
 	vector< Ident > var;
 	int put(Ident id);
+	void print();
 };
 
 class Scanner
@@ -61,11 +62,14 @@ class Scanner
 public:
 	char c;
 	char next;
-	static type_lex types[];
+	static type_lex tw[];
+	static type_lex td[];
 	static const string LEXS[];
-	static const string TWD[];
+	static const string TD[];
+	static const string TW[];
 	void gc();
-	int look();
+	int lookTW();
+	int lookTD();
 	Scanner(const char * filename);
 	Lex get_lex();
 	~Scanner();

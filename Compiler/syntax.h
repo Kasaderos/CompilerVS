@@ -5,10 +5,12 @@
 
 template <class T, int max_size > class Stack
 {
-	T s[max_size];
+	T *s;
+	int size;
 	int top;
 public:
-	Stack() : top(0) {}
+	Stack();
+	~Stack();
 	void reset();
 	void push(T i);
 	T pop();

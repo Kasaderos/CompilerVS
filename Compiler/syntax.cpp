@@ -3,6 +3,17 @@
 
 extern Table_ident TID;
 
+template <class T, int max_size > 
+Stack <T, max_size>::Stack() {
+	s = new T[size = max_size];
+	top = 0;
+}
+
+template <class T, int max_size >
+Stack <T, max_size>::~Stack() {
+	delete[] s;
+}
+
 template <class T, int max_size >
 void Stack <T, max_size >::reset() { top = 0; }
 
@@ -82,13 +93,13 @@ void Parser::get_lex() {
 	curr_lex = scan.get_lex();
 	curr_t = curr_lex.t_lex;
 	curr_v = curr_lex.v_lex;
-	cout << curr_lex << endl;
+	//cout << curr_lex << endl;
 }
 void Parser::analyze() {
 	cout << "starting analyze: " << endl;
 	Prog();
 	prog.print();
-	cout << endl << "Success" << endl;
+	cout << endl << "Parser success" << endl;
 }
 
 void Parser::Prog() {
@@ -103,7 +114,6 @@ void Parser::Prog() {
 void Parser::Dcls() {
 	//cout << "Dcls" << endl;
 	st_int.reset();
-
 	while (1) {
 		Del();
 		deleteNLINE();
@@ -118,12 +128,12 @@ void Parser::Del() {
 		throw curr_lex;
 	type_var = curr_t;					// LEX_FLOAT | LEX_INT
 	get_lex();
-	if (curr_t != LEX_ID) {              // ����� int/float a, b, c, d<\n> ��������� ����� ����
+	if (curr_t != LEX_ID) {              //  int/float a, b, c, d<\n> 
 		throw curr_lex;
 	}
 	st_int.push(atoi(curr_v.c_str()));
-	dec();						// ������� �� ������� LEX_FLOAT | LEX_BOOL | LEX_INT ... 
-	get_lex();							// dec() ����� ����������� ��� ����������
+	dec();						//  LEX_FLOAT | LEX_BOOL | LEX_INT ... 
+	get_lex();							// dec() 
 	if (curr_t != LEX_NLINE)
 		throw curr_lex;
 }
@@ -184,7 +194,7 @@ void Parser::Val() {
 }
 
 void Parser::Expr() {
-	cout << "Expr" << endl;
+	//cout << "Expr" << endl;
 	get_lex();
 	while (curr_t != LEX_NLINE) {
 		if (curr_t != LEX_PLUS && curr_t != LEX_MINUS) // && != LEX_NLINE ��������

@@ -4,49 +4,34 @@ using namespace std;
 
 extern Table_ident TID;
 
-Ident::Ident() : val(""), declare(false), assign(false) {}
+value::value(int i = 0) : i(i) {}
+value::value(double d) : d(d) {}
+value::value(string str) : str(str) {}
+value::value(char ch) : ch(ch) {}
+value::value(bool b) : b(b) {}
+Ident::Ident() : declare(false), assign(false), val(0) {}
 
-Ident::Ident(const string str) : name(str), val(""), declare(false), assign(false) {}
+Ident::Ident(const string str) : name(str), val(0), declare(false), assign(false) {}
 
-int Table_ident::put(Ident id) {
-	for (size_t i = 0; i < TID.var.size(); i++)
-		if (!id.name.compare(TID.var[i].name))
-			return i;
-	TID.var.push_back(id);
-	return TID.var.size() - 1;
-}
-const string Scanner::TWD[] = { "", "=", "int", "float", "print", "+", "-", "\n", "$" };
-
-const string Scanner::LEXS[] = {
-	"LEX_NULL", // 0   
-	"LEX_ASSIGN", // 1
-	"LEX_INT", // 2
-	"LEX_FLOAT", "LEX_PRINT",  // 3, 4, 
-	"LEX_PLUS", "LEX_MINUS", "LEX_NLINE", // 5, 6, 7
-	"LEX_FIN", // 8
-	"LEX_FNUM", "LEX_INUM", // 9, 10 
-	"LEX_ID", // 11
-	"POLIZ_ADDRESS", // 12
-};
 Lex::Lex() {
 	t_lex = LEX_NULL;
-	v_lex = "_";
+	v_lex = value();
 }
-Lex::Lex(type_lex t, string v) {
+Lex::Lex(type_lex t, value v) {
 	t_lex = t;
 	v_lex = v;
 }
 
 Lex::Lex(int i) {
 	t_lex = LEX_INUM;
-	v_lex = to_string(i);
+	v_lex.i = i;
 }
 
-Lex::Lex(double f) {
+Lex::Lex(double d) {
 	t_lex = LEX_FNUM;
-	v_lex = to_string(f);
+	v_lex.d = d;
 }
-
+/*
 Lex convert(const Lex & a) {
 	if (a.t_lex == LEX_ID) {
 		int i = atoi(a.v_lex.c_str());
@@ -91,17 +76,7 @@ ostream & operator << (ostream & s, Lex lx) {
 	return s;
 }
 
-type_lex Scanner::types[] = {
-	LEX_NULL, // 0   
-	LEX_ASSIGN, // 1
-	LEX_INT, // 2
-	LEX_FLOAT, LEX_PRINT, // 3, 4, 
-	LEX_PLUS, LEX_MINUS, LEX_NLINE, // 5, 6, 7
-	LEX_FIN, // 8
-	LEX_FNUM, LEX_INUM, // 9, 10
-	LEX_ID, // 11
-	POLIZ_ADDRESS, // 12
-};
+
 
 Scanner::Scanner(const char *filename)
 {
@@ -119,11 +94,32 @@ void Scanner::gc() {
 	fp.get(c);
 }
 
-int Scanner::look() {
-	for (int i = 0; i < NUM_WORDS; i++)
-		if (!buf.compare(TWD[i]))
+int Scanner::lookTW() {
+	int i = 1;
+	while (!TW[i].empty()) {
+		if (!buf.compare(TW[i]))
 			return i;
+		++i;
+	}
 	return 0;
+}
+
+int Scanner::lookTD() {
+	int i = 1;
+	while (!TD[i].empty()) {
+		if (!buf.compare(TD[i]))
+			return i;
+		++i;
+	}
+	return 0;
+}
+
+int Table_ident::put(Ident id) {
+	for (size_t i = 0; i < TID.var.size(); i++)
+		if (!id.name.compare(TID.var[i].name))
+			return i;
+	TID.var.push_back(id);
+	return TID.var.size() - 1;
 }
 
 Lex Scanner::get_lex()
@@ -151,8 +147,8 @@ Lex Scanner::get_lex()
 				gc();
 			}
 			else {
-				if ((j = look()) != 0) {
-					return Lex(types[j], to_string(j));
+				if ((j = lookTW()) != 0) {
+					return Lex(tw[j], to_string(j));
 				}
 				else {
 					Ident id(buf);
@@ -178,9 +174,9 @@ Lex Scanner::get_lex()
 			break;
 		case DELIM:
 			buf.push_back(c);
-			if ((j = look()) != 0) {
+			if ((j = lookTD()) != 0) {
 				gc();
-				return Lex(types[j], to_string(j));
+				return Lex(td[j], to_string(j));
 			}
 			else
 				throw c;
@@ -188,5 +184,11 @@ Lex Scanner::get_lex()
 		}
 	} while (1);
 	return Lex(LEX_NULL, "");
+}
+
+void Table_ident::print() {
+	cout << endl;
+	for (int i = 0; i < TID.var.size(); i++)
+		cout << TID.var[i].name << " : " << TID.var[i].val << endl;
 }
 
