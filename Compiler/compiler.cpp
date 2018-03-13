@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 		interpretator.interpretation();
 	}
 	catch (Lex lex) {
-		cout << Scanner::LEXS[lex.t_lex] << " error" << endl;
+		cout << Scanner::LEXS[lex.get_type()] << " error" << endl;
 	}
 	catch (const char * str) {
 		cout << str << endl;
@@ -22,6 +22,7 @@ int main(int argc, char **argv)
 	catch (string str) {
 		cout << str << endl;
 	}
+	//check_scan();
 	getchar();
 	return 0;
 }
@@ -32,7 +33,7 @@ void check_scan() {
 		while (1) {
 			Lex t = scan.get_lex();
 			cout << t << endl;
-			if (t.t_lex == LEX_FIN)
+			if (t.get_type() == LEX_FIN)
 				break;
 		}
 	}

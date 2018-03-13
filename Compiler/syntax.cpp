@@ -91,8 +91,8 @@ void Parser::deleteNLINE() {
 }
 void Parser::get_lex() {
 	curr_lex = scan.get_lex();
-	curr_t = curr_lex.t_lex;
-	curr_v = curr_lex.v_lex;
+	curr_t = curr_lex.get_type();
+	curr_v = curr_lex.get_val();
 	//cout << curr_lex << endl;
 }
 void Parser::analyze() {
@@ -126,14 +126,14 @@ void Parser::Del() {
 	//cout << "Del" << endl;
 	if (curr_t != LEX_FLOAT && curr_t != LEX_INT)
 		throw curr_lex;
-	type_var = curr_t;					// LEX_FLOAT | LEX_INT
+	type_var = curr_t;				
 	get_lex();
-	if (curr_t != LEX_ID) {              //  int/float a, b, c, d<\n> 
+	if (curr_t != LEX_ID) {              
 		throw curr_lex;
 	}
-	st_int.push(atoi(curr_v.c_str()));
-	dec();						//  LEX_FLOAT | LEX_BOOL | LEX_INT ... 
-	get_lex();							// dec() 
+	st_int.push(curr_v);
+	dec();						 
+	get_lex();							
 	if (curr_t != LEX_NLINE)
 		throw curr_lex;
 }
@@ -163,7 +163,7 @@ void Parser::Stmt() {
 			throw curr_lex;
 		Val();
 		Expr();
-		prog.put_lex(Lex(LEX_ASSIGN, ""));
+		prog.put_lex(Lex(LEX_ASSIGN));
 	}
 	else if (curr_t == LEX_PRINT) {
 		get_lex();
@@ -171,7 +171,7 @@ void Parser::Stmt() {
 			throw curr_lex;
 		check_id();
 		prog.put_lex(curr_lex);
-		prog.put_lex(Lex(LEX_PRINT, ""));
+		prog.put_lex(Lex(LEX_PRINT));
 		get_lex();
 		if (curr_t != LEX_NLINE)
 			throw curr_lex;
@@ -197,7 +197,8 @@ void Parser::Expr() {
 	//cout << "Expr" << endl;
 	get_lex();
 	while (curr_t != LEX_NLINE) {
-		if (curr_t != LEX_PLUS && curr_t != LEX_MINUS) // && != LEX_NLINE ��������
+		if (curr_t != LEX_PLUS && curr_t != LEX_MINUS
+						&& curr_t != LEX_MUL && curr_t != LEX_DIV)
 			throw curr_lex;
 		st_lex.push(curr_lex);
 		Val();
@@ -217,7 +218,7 @@ void Parser::dec()
 		else
 		{
 			TID.var[i].declare = true;
-			TID.var[i].type = type_var;
+			TID.var[i].set_type(type_var); //type_var 
 		}
 	}
 	cout << "declared : ";
@@ -226,9 +227,9 @@ void Parser::dec()
 
 void Parser::check_id()
 {
-	int c_val = atoi(curr_v.c_str());
+	int c_val = (int)curr_v;
 	if (TID.var[c_val].declare)
-		st_lex.push(Lex(TID.var[c_val].type, curr_v));
+		st_lex.push(Lex(TID.var[c_val].get_type(), curr_v));
 	else
 		throw "Not declared";
 }
@@ -237,7 +238,7 @@ void Parser::eq_type()
 {
 Lex t1 = st_lex.pop();
 Lex t2 = st_lex.pop();
-if (t1.t_lex != t1.t_lex) throw "Wrong types are in =";
+if (t1.get_type() != t1.get_type()) throw "Wrong types are in =";
 }
 
 void Parser::check_op()
@@ -248,13 +249,13 @@ void Parser::check_op()
 	prog.put_lex(op);
 	t1 = st_lex.pop();
 	cout << "t2 op t1 : ";
-	cout << Scanner::LEXS[t2.t_lex] << " ";
-	cout << Scanner::LEXS[op.t_lex] << " ";
-	cout << Scanner::LEXS[t1.t_lex] << endl;
+	cout << Scanner::LEXS[t2.get_type()] << " ";
+	cout << Scanner::LEXS[op.get_type()] << " ";
+	cout << Scanner::LEXS[t1.get_type()] << endl;
 
-	if (t1.t_lex != t2.t_lex)
-		st_lex.push(Lex(LEX_FLOAT, ""));
-	else if (t1.t_lex == t2.t_lex)
+	if (t1.get_type() != t2.get_type())
+		st_lex.push(Lex(LEX_FLOAT));
+	else if (t1.get_type() == t2.get_type())
 		st_lex.push(t1);
 	else
 		throw "Wrong types are in operation";
@@ -264,14 +265,13 @@ void Executer::execute(Poliz & prog) {
 	Stack< Lex, 100 > args;
 	int i, index = 0;
 	Lex lex1, lex2, lex3;
-	string val;
 	int size = prog.get_pos();
 
 	while (index < size) {
 		args.print();
 		cout << endl;
 		curr_lex = prog[index];
-		switch (curr_lex.t_lex)
+		switch (curr_lex.get_type())
 		{
 		case LEX_INUM:
 		case LEX_FNUM:
@@ -279,7 +279,7 @@ void Executer::execute(Poliz & prog) {
 			args.push(curr_lex);
 			break;
 		case LEX_ID:
-			i = atoi(curr_lex.v_lex.c_str());
+			i = (int)curr_lex.get_val();
 			if (TID.var[i].assign) {
 				args.push(curr_lex);
 				break;
@@ -293,24 +293,32 @@ void Executer::execute(Poliz & prog) {
 			lex1 = args.pop();
 			args.push(args.pop() - lex1);
 			break;
+		case LEX_MUL:
+			args.push(args.pop() * args.pop());
+			break;
+		case LEX_DIV:
+			lex1 = args.pop();
+			args.push(args.pop() / lex1);
+			break;
 		case LEX_ASSIGN:
 			lex1 = args.pop();
+			//cout << "lvalue : " << lex1.v_lex.d << endl;
 			lex2 = args.pop();
-			lex3 = convert(lex1);
-			i = atoi(lex2.v_lex.c_str());
-			TID.var[i].val = lex3.v_lex;
-			if (lex3.t_lex == LEX_FNUM && TID.var[i].type == LEX_INT)
+			lex3 = to_const(lex1);
+			i = (int)lex2.get_val();
+			if (lex3.get_type() == LEX_FNUM && TID.var[i].get_type() == LEX_INT)
 				throw "impilcit float to int";
-			else if ((lex3.t_lex == LEX_FNUM || lex3.t_lex == LEX_INUM) && TID.var[i].type == LEX_FLOAT)
-				TID.var[i].type = LEX_FLOAT;
-			else
-				TID.var[i].type = LEX_INT;
+			//cout << "rvalue : " << lex3.v_lex.d << endl;
+			TID.var[i].set_val(lex3.get_val());
 			TID.var[i].assign = true;
 			break;
 		case LEX_PRINT:
 			lex1 = args.pop();
-			lex2 = convert(lex1);
-			cout << lex2.v_lex << endl;
+			lex1 = to_const(lex1);
+			if (lex1.get_type() == LEX_INUM)
+				cout << (int)lex1.get_val() << endl;
+			else
+				cout << lex1.get_val() << endl;
 			break;
 		default:
 			throw "POLIZ: unexpected elem";

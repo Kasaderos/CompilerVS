@@ -33,14 +33,13 @@ public:
 	int get_pos();
 	Lex & operator[] (int index);
 	void print();
-	int execute();
 };
 
 class Parser {
 	Lex curr_lex;
 	type_lex curr_t;
 	type_lex type_var;
-	string curr_v;
+	double curr_v;
 	Scanner scan;
 	Stack < int, 100 > st_int;
 	Stack < Lex, 100 > st_lex;

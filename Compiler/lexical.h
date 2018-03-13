@@ -7,43 +7,33 @@
 #include <string>
 using namespace std;
 
-union value {
-	int i;
-	double d;
-	string str;
-	char ch;
-	bool b;
-	value(int i = 0);
-	value(double d);
-	value(string str);
-	value(char ch);
-	value(bool b);
-};
-
 class Lex {
-public:
 	type_lex t_lex;
-	value v_lex;
-	Lex();
-	Lex(type_lex t, value v);
-	Lex(double d);
+	double v_lex;
+public:
+	Lex(type_lex t = LEX_NULL, double v = 0);
 	Lex(int i);
+	Lex(double d);
+	type_lex get_type() const ;
+	void set_type(type_lex t);
+	double get_val() const;
+	void set_val(double val);
 	friend ostream & operator << (ostream & s, Lex lx);
 	friend Lex operator + (const Lex & a, const Lex & b);
 	friend Lex operator - (const Lex & a, const Lex & b);
+	friend Lex operator * (const Lex & a, const Lex & b);
+	friend Lex operator / (const Lex & a, const Lex & b);
 };
 
-Lex convert(const Lex & a);
+Lex to_const(const Lex & a);
 
-class Ident {
+class Ident : public Lex{
 public:
-	type_lex type;
 	string name;
-	value val;
 	bool declare;
 	bool assign;
 	Ident();
-	explicit Ident(const string str);
+	explicit Ident(string str);
 };
 
 class Table_ident {
