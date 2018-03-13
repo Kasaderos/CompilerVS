@@ -4,75 +4,85 @@ using namespace std;
 
 extern Table_ident TID;
 
-value::value(int i = 0) : i(i) {}
-value::value(double d) : d(d) {}
-value::value(string str) : str(str) {}
-value::value(char ch) : ch(ch) {}
-value::value(bool b) : b(b) {}
-Ident::Ident() : declare(false), assign(false), val(0) {}
+Ident::Ident() : declare(false), assign(false) {}
 
-Ident::Ident(const string str) : name(str), val(0), declare(false), assign(false) {}
+Ident::Ident(string str) : name(str.c_str()), declare(false), assign(false) {}
 
-Lex::Lex() {
-	t_lex = LEX_NULL;
-	v_lex = value();
-}
-Lex::Lex(type_lex t, value v) {
+Lex::Lex(type_lex t, double v) {
 	t_lex = t;
 	v_lex = v;
 }
 
 Lex::Lex(int i) {
 	t_lex = LEX_INUM;
-	v_lex.i = i;
+	v_lex = i;
 }
 
 Lex::Lex(double d) {
 	t_lex = LEX_FNUM;
-	v_lex.d = d;
+	v_lex = d;
 }
-/*
-Lex convert(const Lex & a) {
-	if (a.t_lex == LEX_ID) {
-		int i = atoi(a.v_lex.c_str());
-		//cout << "convert : ";
-		//cout << Scanner::LEXS[TID.var[i].type] << endl;
-		if (TID.var[i].type == LEX_INT)
-			return Lex(LEX_INUM, TID.var[i].val);
-		if (TID.var[i].type == LEX_FLOAT)
-			return Lex(LEX_FNUM, TID.var[i].val);
+
+type_lex Lex::get_type() const {
+	return t_lex;
+}
+
+void Lex::set_type(type_lex t) {
+	t_lex = t;
+}
+double Lex::get_val() const {
+	return v_lex;
+}
+
+void Lex::set_val(double val) {
+	v_lex = val;
+}
+
+Lex to_const(const Lex & a) {
+	if (a.get_type() == LEX_ID) {
+		int i = (int)a.get_val();
+		if (TID.var[i].get_type() == LEX_INT)
+			return (int)TID.var[i].get_val();
 		else
-			throw "error convert lex";
+			return TID.var[i].get_val();
 	}
 	return a;
 }
 
 Lex operator + (const Lex & a, const Lex & b) {
-	Lex lex1 = convert(a);
-	Lex lex2 = convert(b);
-	//cout << Scanner::LEXS[lex1.t_lex] << endl;
-	//cout << Scanner::LEXS[lex2.t_lex] << endl;
+	Lex lex1 = to_const(a);
+	Lex lex2 = to_const(b);
 	if (lex1.t_lex == LEX_FNUM || lex2.t_lex == LEX_FNUM)
-		return atof(lex1.v_lex.c_str()) + atof(lex2.v_lex.c_str());
-	return atoi(lex1.v_lex.c_str()) + atoi(lex2.v_lex.c_str());
+		return lex1.get_val() + lex2.get_val();
+	return (int)lex1.get_val() + (int)lex2.get_val();
 }
 
 Lex operator - (const Lex & a, const Lex & b) {
-	Lex lex1 = convert(a);
-	Lex lex2 = convert(b);
+	Lex lex1 = to_const(a);
+	Lex lex2 = to_const(b);
 	if (lex1.t_lex == LEX_FNUM || lex2.t_lex == LEX_FNUM)
-		return atof(lex1.v_lex.c_str()) - atof(lex2.v_lex.c_str());
-	return atoi(lex1.v_lex.c_str()) - atoi(lex2.v_lex.c_str());
+		return lex1.get_val() - lex2.get_val();
+	return (int)lex1.get_val() - (int)lex2.get_val();
 }
-/*
-Lex Lex::operator * (const Lex & a, const Lex & b){
 
+Lex operator * (const Lex & a, const Lex & b){
+	Lex lex1 = to_const(a);
+	Lex lex2 = to_const(b);
+	if (lex1.t_lex == LEX_FNUM || lex2.t_lex == LEX_FNUM)
+		return lex1.get_val() * lex2.get_val();
+	return (int)lex1.get_val() * (int)lex2.get_val();
 }
-Lex Lex::operator / (const Lex & a, const Lex & b){
+Lex operator / (const Lex & a, const Lex & b){
+	Lex lex1 = to_const(a);
+	Lex lex2 = to_const(b);
+	if (lex1.t_lex == LEX_FNUM || lex2.t_lex == LEX_FNUM)
+		return lex1.get_val() / lex2.get_val();
+	return (int)lex1.get_val() / (int)lex2.get_val();
+}
 
-}*/
 ostream & operator << (ostream & s, Lex lx) {
-	s << '(' << Scanner::LEXS[lx.t_lex] << ',' << lx.v_lex << ')';
+	s << '(' << Scanner::LEXS[lx.get_type()] << ',';
+	s << (lx.get_type() == LEX_FNUM ? lx.get_val() : (int)lx.get_val()) << ')';
 	return s;
 }
 
@@ -148,12 +158,12 @@ Lex Scanner::get_lex()
 			}
 			else {
 				if ((j = lookTW()) != 0) {
-					return Lex(tw[j], to_string(j));
+					return Lex(tw[j], j);
 				}
 				else {
 					Ident id(buf);
 					j = TID.put(id);
-					return Lex(LEX_ID, to_string(j));
+					return Lex(LEX_ID, j);
 				}
 			}
 			break;
@@ -167,28 +177,28 @@ Lex Scanner::get_lex()
 				buf.push_back(c);
 				gc();
 			}
-			else if (f)
-				return Lex(LEX_FNUM, buf);
+			else if (f) 
+				return Lex(stof(buf));
 			else
-				return Lex(LEX_INUM, buf);
+				return Lex(stoi(buf));
 			break;
 		case DELIM:
 			buf.push_back(c);
 			if ((j = lookTD()) != 0) {
 				gc();
-				return Lex(td[j], to_string(j));
+				return Lex(td[j], j);
 			}
 			else
 				throw c;
 			break;
 		}
 	} while (1);
-	return Lex(LEX_NULL, "");
+	return Lex();
 }
 
 void Table_ident::print() {
 	cout << endl;
-	for (int i = 0; i < TID.var.size(); i++)
-		cout << TID.var[i].name << " : " << TID.var[i].val << endl;
+	for (size_t i = 0; i < TID.var.size(); i++) 
+		cout << i << " : " << TID.var[i].name << endl;
 }
 
