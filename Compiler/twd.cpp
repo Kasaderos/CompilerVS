@@ -3,6 +3,7 @@
 type_lex Scanner::td[] = {
 	LEX_NULL,
 	LEX_ASSIGN,
+	LEX_COMMA,
 	LEX_PLUS,
 	LEX_MINUS,
 	LEX_MUL,
@@ -43,6 +44,7 @@ type_lex Scanner::tw[] = {
 const string Scanner::TD[] = {
 	"",
 	"=",
+	",",
 	"+",
 	"-",
 	"*",
@@ -83,6 +85,7 @@ const string Scanner::TW[] = {
 const string Scanner::LEXS[] = {
 	"LEX_NULL",
 	"LEX_ASSIGN",
+	"LEX_COMMA",
 	"LEX_INT",
 	"LEX_FLOAT",
 	"LEX_STR",
