@@ -126,14 +126,15 @@ void Parser::Del() {
 	//cout << "Del" << endl;
 	if (curr_t != LEX_FLOAT && curr_t != LEX_INT)
 		throw curr_lex;
-	type_var = curr_t;				
-	get_lex();
-	if (curr_t != LEX_ID) {              
-		throw curr_lex;
-	}
-	st_int.push(curr_v);
-	dec();						 
-	get_lex();							
+	type_var = curr_t; // declaration designed by stack
+	do {
+		get_lex();
+		if (curr_t != LEX_ID)
+			throw curr_lex;
+		st_int.push(curr_v);
+		get_lex();
+	} while (curr_t == LEX_COMMA);
+	dec();						 				
 	if (curr_t != LEX_NLINE)
 		throw curr_lex;
 }
@@ -191,12 +192,19 @@ void Parser::Val() {
 		st_lex.push(curr_lex);
 		prog.put_lex(curr_lex);
 	}
+	else if (curr_t == LEX_LPAREN) {
+		Val();
+		Expr();
+		if (curr_t != LEX_RPAREN)
+			throw curr_lex;
+	}else
+		throw curr_lex;
 }
 
 void Parser::Expr() {
 	//cout << "Expr" << endl;
 	get_lex();
-	while (curr_t != LEX_NLINE) {
+	while (curr_t != LEX_NLINE && curr_t != LEX_RPAREN) {
 		if (curr_t != LEX_PLUS && curr_t != LEX_MINUS
 						&& curr_t != LEX_MUL && curr_t != LEX_DIV)
 			throw curr_lex;
@@ -219,10 +227,10 @@ void Parser::dec()
 		{
 			TID.var[i].declare = true;
 			TID.var[i].set_type(type_var); //type_var 
+			cout << "declared : " << TID.var[i].name << endl;
 		}
 	}
-	cout << "declared : ";
-	cout << TID.var[i].name << endl;
+	
 }
 
 void Parser::check_id()
@@ -236,9 +244,9 @@ void Parser::check_id()
 
 void Parser::eq_type()
 {
-Lex t1 = st_lex.pop();
-Lex t2 = st_lex.pop();
-if (t1.get_type() != t1.get_type()) throw "Wrong types are in =";
+	Lex t1 = st_lex.pop();
+	Lex t2 = st_lex.pop();
+	if (t1.get_type() != t1.get_type()) throw "Wrong types are in =";
 }
 
 void Parser::check_op()

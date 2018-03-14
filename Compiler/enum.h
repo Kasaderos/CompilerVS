@@ -4,6 +4,7 @@
 enum type_lex {
 	LEX_NULL,
 	LEX_ASSIGN,
+	LEX_COMMA,
 	LEX_INT,
 	LEX_FLOAT,
 	LEX_STR,
