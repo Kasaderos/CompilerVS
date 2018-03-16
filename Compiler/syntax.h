@@ -14,6 +14,7 @@ public:
 	void reset();
 	void push(T i);
 	T pop();
+	T get_top();
 	bool is_empty();
 	bool is_full();
 	void print();
@@ -37,8 +38,9 @@ public:
 
 class Parser {
 	Lex curr_lex;
+	Lex tmp;
 	type_lex curr_t;
-	type_lex type_var;
+	type_lex type;
 	double curr_v;
 	Scanner scan;
 	Stack < int, 100 > st_int;

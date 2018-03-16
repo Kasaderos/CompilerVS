@@ -52,6 +52,12 @@ T Stack <T, max_size >::pop()
 		throw "Stack_is_empty";
 }
 
+template <class T, int max_size >
+T Stack <T, max_size >::get_top()
+{
+	return s[top - 1];
+}
+
 Poliz::Poliz(int max_size) {
 	p = new Lex[size = max_size];
 	pos = 0;
@@ -87,8 +93,8 @@ void Parser::deleteNLINE() {
 	do {
 		get_lex();
 	} while (curr_t == LEX_NLINE);
-	//cout << "deleteNLINE: " << Scanner::LEXS[curr_t] << endl;
 }
+
 void Parser::get_lex() {
 	curr_lex = scan.get_lex();
 	curr_t = curr_lex.get_type();
@@ -126,7 +132,7 @@ void Parser::Del() {
 	//cout << "Del" << endl;
 	if (curr_t != LEX_FLOAT && curr_t != LEX_INT)
 		throw curr_lex;
-	type_var = curr_t; // declaration designed by stack
+	type = curr_t; // declaration designed by stack
 	do {
 		get_lex();
 		if (curr_t != LEX_ID)
@@ -185,34 +191,38 @@ void Parser::Val() {
 	//cout << "Val" << endl;
 	get_lex();
 	if (curr_t == LEX_ID) {
-		check_id();
+		check_id(); 
 		prog.put_lex(Lex(LEX_ID, curr_v));
 	}
-	else if (curr_t == LEX_FNUM || curr_t == LEX_INUM) {
-		st_lex.push(curr_lex);
+	else if (curr_t == LEX_FNUM || curr_t == LEX_INUM)
 		prog.put_lex(curr_lex);
-	}
 	else if (curr_t == LEX_LPAREN) {
+		check_op();
 		Val();
-		Expr();
-		if (curr_t != LEX_RPAREN)
-			throw curr_lex;
-	}else
+		Expr(); // по одному разу надо зайти (получилось 2 )
+	}
+	else if (curr_t == LEX_RPAREN)
+		check_op();
+	else
 		throw curr_lex;
 }
 
 void Parser::Expr() {
 	//cout << "Expr" << endl;
 	get_lex();
-	while (curr_t != LEX_NLINE && curr_t != LEX_RPAREN) {
-		if (curr_t != LEX_PLUS && curr_t != LEX_MINUS
-						&& curr_t != LEX_MUL && curr_t != LEX_DIV)
+	while (1) {
+		if (curr_t == LEX_NLINE)
+			break;
+		if (curr_t != LEX_PLUS && curr_t != LEX_MINUS // + | - | * | / | "(" | ")"
+					&& curr_t != LEX_MUL && curr_t != LEX_DIV 
+					&& curr_t != LEX_LPAREN && curr_t != LEX_RPAREN)
 			throw curr_lex;
-		st_lex.push(curr_lex);
+		check_op(); 
 		Val();
-		check_op();
 		get_lex();
 	}
+	while (!st_lex.is_empty())
+		prog.put_lex(st_lex.pop()); // Просмотр входного выражения завершен выталкиваем все в ПОЛИЗ
 }
 
 void Parser::dec()
@@ -226,7 +236,7 @@ void Parser::dec()
 		else
 		{
 			TID.var[i].declare = true;
-			TID.var[i].set_type(type_var); //type_var 
+			TID.var[i].set_type(type); //type_var 
 			cout << "declared : " << TID.var[i].name << endl;
 		}
 	}
@@ -236,9 +246,9 @@ void Parser::dec()
 void Parser::check_id()
 {
 	int c_val = (int)curr_v;
-	if (TID.var[c_val].declare)
-		st_lex.push(Lex(TID.var[c_val].get_type(), curr_v));
-	else
+	if (!TID.var[c_val].declare)
+		//st_lex.push(Lex(TID.var[c_val].get_type(), curr_v));
+	//else
 		throw "Not declared";
 }
 
@@ -251,22 +261,31 @@ void Parser::eq_type()
 
 void Parser::check_op()
 {
-	Lex t1, t2, op;
-	t2 = st_lex.pop();
-	op = st_lex.pop();
-	prog.put_lex(op);
-	t1 = st_lex.pop();
-	cout << "t2 op t1 : ";
-	cout << Scanner::LEXS[t2.get_type()] << " ";
-	cout << Scanner::LEXS[op.get_type()] << " ";
-	cout << Scanner::LEXS[t1.get_type()] << endl;
-
-	if (t1.get_type() != t2.get_type())
-		st_lex.push(Lex(LEX_FLOAT));
-	else if (t1.get_type() == t2.get_type())
-		st_lex.push(t1);
-	else
-		throw "Wrong types are in operation";
+	st_lex.print();
+	if (curr_t == LEX_PLUS || curr_t == LEX_MINUS // если curr_lex операция
+		|| curr_t == LEX_MUL || curr_t == LEX_DIV) {
+		while (!st_lex.is_empty()) {
+			type = st_lex.get_top().get_type();
+			if ((curr_t == LEX_MUL || curr_t == LEX_DIV) &&
+				(type == LEX_PLUS || type == LEX_MINUS))
+				break;
+			prog.put_lex(st_lex.pop());
+		}
+		st_lex.push(curr_lex);
+	}
+	else if (curr_t == LEX_LPAREN) // заносим "(" в стэк
+		st_lex.push(curr_lex);
+	else if (curr_t == LEX_RPAREN) { // выталкиваем пока не "(", если стэк пустой ошибка!
+		while (1) {
+			if (st_lex.is_empty())
+				throw "LPAREN and RPAREN error";
+			tmp = st_lex.pop();
+			if (tmp.get_type() != LEX_LPAREN)
+				prog.put_lex(tmp);
+			else
+				break;
+		}
+	}
 }
 
 void Executer::execute(Poliz & prog) {
