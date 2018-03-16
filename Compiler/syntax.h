@@ -37,7 +37,7 @@ public:
 };
 
 class Parser {
-	Lex curr_lex;
+	Lex curr_l;
 	Lex tmp;
 	type_lex curr_t;
 	type_lex type;
@@ -48,10 +48,13 @@ class Parser {
 	void Prog();
 	void Dcls();
 	void Del();
+	void Block();
 	void Stmts();
-	void Expr();
-	void Val();
 	void Stmt();
+	void Expr();
+	void Expr1();
+	void T();
+	void F();
 
 	void dec();
 	void check_id();
@@ -61,12 +64,12 @@ public:
 	Poliz prog;
 	Parser(const char * program);
 	void analyze();
-	void get_lex();
-	void deleteNLINE();
+	void gl();
+	void gln();
 };
 
 class Executer {
-	Lex curr_lex;
+	Lex curr_l;
 public:
 	void execute(Poliz & prog);
 };

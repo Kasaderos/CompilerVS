@@ -31,7 +31,7 @@ void check_scan() {
 	Scanner scan("file.txt");
 	try {
 		while (1) {
-			Lex t = scan.get_lex();
+			Lex t = scan.gl();
 			cout << t << endl;
 			if (t.get_type() == LEX_FIN)
 				break;

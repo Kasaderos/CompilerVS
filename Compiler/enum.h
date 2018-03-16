@@ -9,6 +9,9 @@ enum type_lex {
 	LEX_FLOAT,
 	LEX_STR,
 	LEX_CHAR,
+	LEX_BOOL,
+	LEX_TRUE,
+	LEX_FALSE,
 	LEX_FNUM,
 	LEX_INUM,
 	LEX_ID,
@@ -22,6 +25,8 @@ enum type_lex {
 	LEX_RPAREN, // )
 	LEX_LSQR, // [
 	LEX_RSQR, // ]
+	LEX_BEGIN,
+	LEX_END,
 	LEX_IF,
 	LEX_ELSE,
 	LEX_WHILE,
@@ -44,3 +49,13 @@ enum type_lex {
 };
 
 #endif // !__ENUM_H___
+
+/*
+	Prog  -> Dcls Block
+	Dcls  -> {Del} [$ | '{']
+	Del   -> int Id | float Id
+	Block -> $ | '{' Stmts '}'
+	Stmts -> Stmt {Stmt} 
+	Stmt  -> id = Expr | Block
+	Id	  -> id {, id}
+*/

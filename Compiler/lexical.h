@@ -61,7 +61,7 @@ public:
 	int lookTW();
 	int lookTD();
 	Scanner(const char * filename);
-	Lex get_lex();
+	Lex gl();
 	~Scanner();
 };
 

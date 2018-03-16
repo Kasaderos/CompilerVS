@@ -89,17 +89,17 @@ void Poliz::print() {
 
 Parser::Parser(const char * program) : scan(program), prog(1000) {}
 
-void Parser::deleteNLINE() {
+void Parser::gln() {
 	do {
-		get_lex();
+		gl();
 	} while (curr_t == LEX_NLINE);
 }
 
-void Parser::get_lex() {
-	curr_lex = scan.get_lex();
-	curr_t = curr_lex.get_type();
-	curr_v = curr_lex.get_val();
-	//cout << curr_lex << endl;
+void Parser::gl() {
+	curr_l = scan.gl();
+	curr_t = curr_l.get_type();
+	curr_v = curr_l.get_val();
+	cout << curr_l << endl;
 }
 void Parser::analyze() {
 	cout << "starting analyze: " << endl;
@@ -109,121 +109,154 @@ void Parser::analyze() {
 }
 
 void Parser::Prog() {
-	//cout << "Prog" << endl;
-	deleteNLINE();
 	Dcls();
-	Stmts();
+	Block();
 	if (curr_t != LEX_FIN)
-		throw curr_lex;
+		throw curr_l;
 }
 
 void Parser::Dcls() {
-	//cout << "Dcls" << endl;
 	st_int.reset();
 	while (1) {
+		gln();
+		if (curr_t == LEX_FIN || curr_t == LEX_BEGIN) break;
 		Del();
-		deleteNLINE();
-		if (curr_t == LEX_ID || curr_t == LEX_PRINT || curr_t == LEX_FIN)
-			break;
-	};
+	}
 }
 
 void Parser::Del() {
-	//cout << "Del" << endl;
-	if (curr_t != LEX_FLOAT && curr_t != LEX_INT)
-		throw curr_lex;
-	type = curr_t; // declaration designed by stack
-	do {
-		get_lex();
-		if (curr_t != LEX_ID)
-			throw curr_lex;
-		st_int.push(curr_v);
-		get_lex();
-	} while (curr_t == LEX_COMMA);
-	dec();						 				
-	if (curr_t != LEX_NLINE)
-		throw curr_lex;
-}
-
-void Parser::Stmts() {
-	//cout << "Stmts" << endl;
-	while (1) {
-		Stmt();
-		if (curr_t == LEX_FIN)
-			return;
-		deleteNLINE();
-
-
+	if (curr_t == LEX_FLOAT || curr_t == LEX_INT) {
+		type = curr_t; 
+		do {
+			gl();
+			if (curr_t == LEX_ID)
+				st_int.push(curr_v);
+			else
+				throw curr_l;
+			gl();
+		} while (curr_t == LEX_COMMA);
+		dec();
+		if (curr_t != LEX_NLINE)
+			throw curr_l;
 	}
+	else
+		throw curr_l;
+
+}
+void Parser::Stmts() {
+
+}
+void Parser::Block() {
+	if (curr_t == LEX_FIN)
+		return;
+	else if (curr_t == LEX_BEGIN) {
+		
+		Stmt();
+		if (curr_t == LEX_END)
+			gln();
+		else
+			throw curr_l;
+	}
+	else
+		throw curr_l;
 }
 
 void Parser::Stmt() {
-	//cout << "Stmt" << endl;
-	if (curr_t == LEX_FIN) {
-		return;
-	}
-	else if (curr_t == LEX_ID) {
+	if (curr_t == LEX_ID) {
 		check_id();
 		prog.put_lex(Lex(POLIZ_ADDRESS, curr_v));
-		get_lex();
-		if (curr_t != LEX_ASSIGN)
-			throw curr_lex;
-		Val();
-		Expr();
-		prog.put_lex(Lex(LEX_ASSIGN));
+		gl();
+		if (curr_t != LEX_ASSIGN) {
+			gl();
+			Expr();
+			prog.put_lex(Lex(LEX_ASSIGN));
+		}
+		else
+			throw curr_l;
 	}
 	else if (curr_t == LEX_PRINT) {
-		get_lex();
+		gl();
 		if (curr_t != LEX_ID)
-			throw curr_lex;
+			throw curr_l;
 		check_id();
-		prog.put_lex(curr_lex);
+		prog.put_lex(curr_l);
 		prog.put_lex(Lex(LEX_PRINT));
-		get_lex();
-		if (curr_t != LEX_NLINE)
-			throw curr_lex;
 	}
-	else
-		throw curr_lex;
-}
-
-void Parser::Val() {
-	//cout << "Val" << endl;
-	get_lex();
-	if (curr_t == LEX_ID) {
-		check_id(); 
-		prog.put_lex(Lex(LEX_ID, curr_v));
-	}
-	else if (curr_t == LEX_FNUM || curr_t == LEX_INUM)
-		prog.put_lex(curr_lex);
-	else if (curr_t == LEX_LPAREN) {
-		check_op();
-		Val();
-		Expr(); // по одному разу надо зайти (получилось 2 )
-	}
-	else if (curr_t == LEX_RPAREN)
-		check_op();
-	else
-		throw curr_lex;
+	else if (curr_t == LEX_BEGIN || )
+		Block();
 }
 
 void Parser::Expr() {
-	//cout << "Expr" << endl;
-	get_lex();
-	while (1) {
-		if (curr_t == LEX_NLINE)
-			break;
-		if (curr_t != LEX_PLUS && curr_t != LEX_MINUS // + | - | * | / | "(" | ")"
-					&& curr_t != LEX_MUL && curr_t != LEX_DIV 
-					&& curr_t != LEX_LPAREN && curr_t != LEX_RPAREN)
-			throw curr_lex;
-		check_op(); 
-		Val();
-		get_lex();
+	Expr1();
+	if (curr_t == LEX_SG || curr_t == LEX_SL || curr_t == LEX_SGE ||
+		curr_t == LEX_SLE || curr_t == LEX_SEQ || curr_t == LEX_SNQ)
+	{
+		st_lex.push(curr_l);
+		gl();
+		Expr1();
+		check_op();
 	}
-	while (!st_lex.is_empty())
-		prog.put_lex(st_lex.pop()); // Просмотр входного выражения завершен выталкиваем все в ПОЛИЗ
 }
+
+void Parser::Expr1() {
+	T();
+	while (curr_t == LEX_PLUS || curr_t == LEX_MINUS || curr_t == LEX_OR) {
+		st_lex.push(curr_l);
+		gl();
+		T();
+		check_op();
+	}
+}
+
+void Parser::T() {
+	F();
+	while (curr_t == LEX_MUL || curr_t == LEX_DIV || curr_t == LEX_AND) {
+		st_lex.push(curr_l);
+		gl();
+		F();
+		check_op();
+	}
+}
+
+void Parser::F() {
+	if (curr_t == LEX_ID) {
+		check_id();
+		prog.put_lex(Lex(LEX_ID, curr_v));
+		gl();
+	}
+	else if (curr_t == LEX_INUM || curr_t == LEX_FNUM) {
+		st_lex.push(curr_l);
+		prog.put_lex(curr_l);
+		gl();
+	}
+	else if (curr_t == LEX_TRUE) {
+		st_lex.push(LEX_BOOL);
+		prog.put_lex(Lex(LEX_TRUE, 1));
+		gl();
+	}
+	else if (curr_t == LEX_FALSE) {
+		st_lex.push(LEX_BOOL);
+		prog.put_lex(Lex(LEX_FALSE, 0));
+		gl();
+	}
+	else if (curr_t == LEX_NOT) {
+		gl();
+		F();
+		//check_not();
+	}
+	else if (curr_t == LEX_LPAREN) {
+		gl();
+		Expr();
+		if (curr_t == LEX_RPAREN)
+			gl();
+		else
+			throw curr_l;
+	}
+	else
+		throw curr_l;
+}
+
+
 
 void Parser::dec()
 {
@@ -239,16 +272,15 @@ void Parser::dec()
 			TID.var[i].set_type(type); //type_var 
 			cout << "declared : " << TID.var[i].name << endl;
 		}
-	}
-	
+	}	
 }
 
 void Parser::check_id()
 {
 	int c_val = (int)curr_v;
 	if (!TID.var[c_val].declare)
-		//st_lex.push(Lex(TID.var[c_val].get_type(), curr_v));
-	//else
+		st_lex.push(Lex(TID.var[c_val].get_type(), curr_v));
+	else
 		throw "Not declared";
 }
 
@@ -262,7 +294,7 @@ void Parser::eq_type()
 void Parser::check_op()
 {
 	st_lex.print();
-	if (curr_t == LEX_PLUS || curr_t == LEX_MINUS // если curr_lex операция
+	if (curr_t == LEX_PLUS || curr_t == LEX_MINUS // если curr_l операция
 		|| curr_t == LEX_MUL || curr_t == LEX_DIV) {
 		while (!st_lex.is_empty()) {
 			type = st_lex.get_top().get_type();
@@ -271,10 +303,8 @@ void Parser::check_op()
 				break;
 			prog.put_lex(st_lex.pop());
 		}
-		st_lex.push(curr_lex);
+		st_lex.push(curr_l);
 	}
-	else if (curr_t == LEX_LPAREN) // заносим "(" в стэк
-		st_lex.push(curr_lex);
 	else if (curr_t == LEX_RPAREN) { // выталкиваем пока не "(", если стэк пустой ошибка!
 		while (1) {
 			if (st_lex.is_empty())
@@ -297,18 +327,18 @@ void Executer::execute(Poliz & prog) {
 	while (index < size) {
 		args.print();
 		cout << endl;
-		curr_lex = prog[index];
-		switch (curr_lex.get_type())
+		curr_l = prog[index];
+		switch (curr_l.get_type())
 		{
 		case LEX_INUM:
 		case LEX_FNUM:
 		case POLIZ_ADDRESS:
-			args.push(curr_lex);
+			args.push(curr_l);
 			break;
 		case LEX_ID:
-			i = (int)curr_lex.get_val();
+			i = (int)curr_l.get_val();
 			if (TID.var[i].assign) {
-				args.push(curr_lex);
+				args.push(curr_l);
 				break;
 			}
 			else

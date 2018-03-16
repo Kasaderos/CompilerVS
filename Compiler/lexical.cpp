@@ -132,7 +132,7 @@ int Table_ident::put(Ident id) {
 	return TID.var.size() - 1;
 }
 
-Lex Scanner::get_lex()
+Lex Scanner::gl()
 {
 	int j, f = 0;
 	ST = H;
